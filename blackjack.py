@@ -132,24 +132,16 @@ def player_turn(deck, player_hand, dealer_hand):
         # check if player can split
         can_split = len(
             player_hand.cards) == 2 and player_hand.cards[0].rank == player_hand.cards[1].rank
-        split_prompt = ", (S)plit" if can_split else ""
+        split_prompt = ", (SP)lit" if can_split else ""
 
         action = input(
-            f"Do you want to (H)it, (S)tand, (D)ouble{split_prompt}? ").lower()
+            f"Do you want to (H)it, (S)tand{split_prompt}? ").lower()
 
         if action == 'h':
             player_hand.add_card(deck.deal())
         elif action == 's':
             break
-        elif action == 'd':
-            if len(player_hand.cards) == 2:
-                player_hand.add_card(deck.deal())
-                print(
-                    f"You doubled down. Your new hand: {player_hand} ({player_hand.value})")
-                break
-            else:
-                print("You can only double down on your first two cards.")
-        elif action == 'p' and can_split:
+        elif action == 'sp' and can_split:
             # will be completed later
             print("split is now treated as a hit.")
             player_hand.add_card(deck.deal())
@@ -180,8 +172,8 @@ def game():
         print(f"\nYour balance is ${balance:.2f}")
 
         play_again = input(
-            "Press Enter to play a new hand, or type 'quit' to exit: ").lower()
-        if play_again == 'quit':
+            "Press Enter to play a new hand, or type 'q' to exit: ").lower()
+        if play_again == 'q':
             break
 
         os.system('cls' if os.name == 'nt' else 'clear')
@@ -212,17 +204,17 @@ def game():
             winnings = -bet
         else:
             # handle doubling down
-            original_bet = bet
             if len(player_hand.cards) == 2:
                 action_check = input(
                     "About to start your turn. (D)ouble available on first move. Type 'd' to double now or any key to continue. ").lower()
-                if action_check == 'd' and balance >= bet * 2:
-                    bet *= 2
-                    print(f"Bet doubled to ${bet:.2f}")
-                elif action_check == 'd':
-                    print("Insufficient balance to double down.")
-                else:
+                if action_check != 'd':
                     print("Continuing without doubling down.")
+                elif balance >= bet * 2:  # balance allows doubling down
+                    bet *= 2
+                    player_hand.add_card(deck.deal())
+                    print(f"Bet doubled to ${bet:.2f}")
+                else:
+                    print("Insufficient balance to double down.")
 
             winnings = play_hand(deck, player_hand, dealer_hand, bet)
 
