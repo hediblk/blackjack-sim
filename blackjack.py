@@ -1,5 +1,6 @@
 import os
 
+from balance_manager import BalanceManager
 from card_counter import CardCounter
 from deck import Deck
 from hand import Hand
@@ -8,21 +9,6 @@ from hand import Hand
 def display_count(counter):
     if counter and counter.enabled:
         print(f"[Card Counter] Running count: {counter.get_count():+d}")
-
-
-def get_balance():
-    if os.path.exists("balance.txt"):
-        with open("balance.txt", "r") as f:
-            try:
-                return float(f.read())
-            except ValueError:
-                return 1000.0
-    return 1000.0
-
-
-def save_balance(balance):
-    with open("balance.txt", "w") as f:
-        f.write(str(balance))
 
 
 def get_bet(balance):
@@ -101,7 +87,7 @@ def dealer_turn(deck, dealer_hand):
 def game():
     """main game loop"""
 
-    balance = get_balance()
+    balance_manager = BalanceManager()
     counter = CardCounter()
     deck = Deck(counter=counter)
 
@@ -111,12 +97,12 @@ def game():
         print("Card counting enabled. Running count starts at +0.")
 
     while True:
-        if balance <= 0:
+        if balance_manager.balance <= 0:
             print("You've run out of money! Game over.")
-            save_balance(1000.0)  # reset balance
+            balance_manager.reset()  # reset balance
             break
 
-        print(f"\nYour balance is ${balance:.2f}")
+        print(f"\nYour balance is ${balance_manager.balance:.2f}")
 
         play_again = input(
             "Press Enter to play a new hand, or type 'q' to exit: ").lower()
@@ -125,7 +111,7 @@ def game():
 
         os.system('cls' if os.name == 'nt' else 'clear')
 
-        bet = get_bet(balance)
+        bet = get_bet(balance_manager.balance)
 
         player_hand = Hand()
         dealer_hand = Hand()
@@ -157,7 +143,7 @@ def game():
                     "About to start your turn. (D)ouble available on first move. Type 'd' to double now or any key to continue. ").lower()
                 if action_check != 'd':
                     print("Continuing without doubling down.")
-                elif balance >= bet * 2:  # balance allows doubling down
+                elif balance_manager.balance >= bet * 2:  # balance allows doubling down
                     bet *= 2
                     player_hand.add_card(deck.deal())
                     print(f"Bet doubled to ${bet:.2f}")
@@ -166,14 +152,13 @@ def game():
 
             winnings = play_hand(deck, player_hand, dealer_hand, bet, counter)
 
-        balance += winnings
-        save_balance(balance)
+        balance_manager.update(winnings)
 
-    print(f"\nThanks for playing! Your final balance is ${balance:.2f}.")
-    if balance > 0:
-        save_balance(balance)
+    print(f"\nThanks for playing! Your final balance is ${balance_manager.balance:.2f}.")
+    if balance_manager.balance > 0:
+        balance_manager.save()
     else:
-        save_balance(1000)
+        balance_manager.reset()
 
 
 if __name__ == "__main__":
