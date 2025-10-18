@@ -1,7 +1,13 @@
 import os
 
+from card_counter import CardCounter
 from deck import Deck
 from hand import Hand
+
+
+def display_count(counter):
+    if counter and counter.enabled:
+        print(f"[Card Counter] Running count: {counter.get_count():+d}")
 
 
 def get_balance():
@@ -32,9 +38,9 @@ def get_bet(balance):
             print("Please enter a valid number.")
 
 
-def play_hand(deck, player_hand, dealer_hand, bet):
+def play_hand(deck, player_hand, dealer_hand, bet, counter=None):
 
-    player_turn(deck, player_hand, dealer_hand)
+    player_turn(deck, player_hand, dealer_hand, counter)
 
     if player_hand.value > 21:
         print(f"You busted with {player_hand.value}. You lose ${bet:.2f}.")
@@ -59,11 +65,12 @@ def play_hand(deck, player_hand, dealer_hand, bet):
         return 0
 
 
-def player_turn(deck, player_hand, dealer_hand):
+def player_turn(deck, player_hand, dealer_hand, counter=None):
 
     while player_hand.value < 21:
         print(f"\nYour hand: {player_hand} ({player_hand.value})")
         print(f"Dealer's showing: {dealer_hand.cards[0]}")
+        display_count(counter)
 
         # check if player can split
         can_split = len(
@@ -95,9 +102,13 @@ def game():
     """main game loop"""
 
     balance = get_balance()
-    deck = Deck()
+    counter = CardCounter()
+    deck = Deck(counter=counter)
 
     print("Welcome to Blackjack!")
+    if input("Enable card counting helper? (y/N): ").strip().lower() == 'y':
+        counter.enable()
+        print("Card counting enabled. Running count starts at +0.")
 
     while True:
         if balance <= 0:
@@ -141,6 +152,7 @@ def game():
         else:
             # handle doubling down
             if len(player_hand.cards) == 2:
+                display_count(counter)
                 action_check = input(
                     "About to start your turn. (D)ouble available on first move. Type 'd' to double now or any key to continue. ").lower()
                 if action_check != 'd':
@@ -152,7 +164,7 @@ def game():
                 else:
                     print("Insufficient balance to double down.")
 
-            winnings = play_hand(deck, player_hand, dealer_hand, bet)
+            winnings = play_hand(deck, player_hand, dealer_hand, bet, counter)
 
         balance += winnings
         save_balance(balance)

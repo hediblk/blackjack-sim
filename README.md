@@ -10,5 +10,4 @@ The game follows these rules:
 ## Next Steps
 
 - The split logic is too complex with this code as it stands as it requires keeping track of multiple hands at once --> may need to iterate over an array containing active hands
-- Build interactive UI instead of console
-- Implement some form of card counting strategy
+- Build interactive UI instead of console (tkinter maybe?)
