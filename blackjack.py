@@ -1,71 +1,7 @@
-import random
 import os
 
-SUITS = ['♠', '♥', '♦', '♣']
-RANKS = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K', 'A']
-
-
-class Card:
-    """a single card"""
-
-    def __init__(self, suit, rank):
-        self.suit = suit
-        self.rank = rank
-
-    def __str__(self):
-        return f"{self.rank}{self.suit}"
-
-    def get_value(self):
-        """converts from card rank to blackjack value"""
-        if self.rank in ['J', 'Q', 'K']:
-            return 10
-        if self.rank == 'A':
-            return 11
-        return int(self.rank)
-
-
-class Deck:
-    """full card deck"""
-
-    def __init__(self, num_decks=6):
-        self.cards = [Card(suit, rank) for _ in range(num_decks)
-                      for suit in SUITS for rank in RANKS]
-        self.shuffle()
-
-    def shuffle(self):
-        random.shuffle(self.cards)
-
-    def deal(self):
-        """pick one card from the deck"""
-        if not self.cards:
-            print("Reshuffling the deck...")
-            self.__init__()
-        return self.cards.pop()
-
-
-class Hand:
-    """hand of cards for player or dealer"""
-
-    def __init__(self):
-        self.cards = []
-        self.value = 0
-        self.aces = 0
-
-    def add_card(self, card):
-        self.cards.append(card)
-        self.value += card.get_value()
-        if card.rank == 'A':
-            self.aces += 1
-        self.adjust_for_ace()
-
-    def adjust_for_ace(self):
-        """change value of aces if over 21"""
-        while self.value > 21 and self.aces:
-            self.value -= 10
-            self.aces -= 1
-
-    def __str__(self):
-        return ', '.join(str(card) for card in self.cards)
+from deck import Deck
+from hand import Hand
 
 
 def get_balance():
