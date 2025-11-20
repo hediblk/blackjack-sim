@@ -12,6 +12,7 @@ class Deck:
     def __init__(self, num_decks=6, counter=None):
         self.num_decks = num_decks
         self.counter = counter
+        self.total_dealt = 0
         self._build_deck()
 
     def _build_deck(self):
@@ -32,8 +33,9 @@ class Deck:
         """Deal one card from the shoe, reshuffling if necessary."""
         if not self.cards:
             print("Reshuffling the deck...")
-            self._build_shoe()
+            self._build_deck()
         card = self.cards.pop()
+        self.total_dealt += 1
         if self.counter:
             self.counter.record(card)
         return card

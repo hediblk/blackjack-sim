@@ -1,6 +1,7 @@
 # Blackjack Simulator
 
 This is a basic blackjack simulator built with Python.
+It uses an sqlitedatabase to log game sessions and hands played and keep track of player balance accross games.
 
 The game follows these rules:
 
